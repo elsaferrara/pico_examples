@@ -37,7 +37,7 @@ rp2040_hal = "^2.0"
 pico_bsp = "^2.0"
 chests = "~0.1.1"
 
-[[pins]]
+ [[pins]]
 rp2040_hal = {path="../rp2040_hal"}
 pico_bsp = {path="../pico_bsp"}
 

@@ -5,13 +5,15 @@
 --
 with HAL.GPIO;   use HAL.GPIO;
 with HAL.UART;   use HAL.UART;
+with HAL.Time;
 with RP.Device;  use RP.Device;
 with RP.GPIO;    use RP.GPIO;
 with RP.UART;
 with RP.Clock;
+with RP.Timer.Interrupts;
 with Pico;
 
-procedure Main is
+procedure Main with SPARK_Mode is
    Test_Error : exception;
    UART    : RP.UART.UART_Port renames RP.Device.UART_0;
    UART_TX : RP.GPIO.GPIO_Point renames Pico.GP16;
@@ -20,7 +22,7 @@ procedure Main is
    Status  : UART_Status;
 
    procedure Send_Hello is
-      Hello       : constant String := "Hello, Pico!" & ASCII.CR & ASCII.LF;
+      Hello       : constant String := "Hello Pico !" & ASCII.CR & ASCII.LF;
       Hello_Bytes : UART_Data_8b (1 .. Hello'Length);
    begin
       for I in Hello'Range loop

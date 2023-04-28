@@ -15,4 +15,8 @@ project UART_Echo is
          Pico_BSP.Linker_Switches;
    end Linker;
 
+   package Compiler is
+      for Default_Switches ("Ada") use ("-g", "-Og", "-gnata");
+   end Compiler;
+
 end UART_Echo;
