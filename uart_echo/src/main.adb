@@ -18,8 +18,10 @@ procedure Main with SPARK_Mode is
    UART    : RP.UART.UART_Port renames RP.Device.UART_0;
    UART_TX : RP.GPIO.GPIO_Point renames Pico.GP16;
    UART_RX : RP.GPIO.GPIO_Point renames Pico.GP17;
-   Buffer  : UART_Data_8b (1 .. 1);
+   Buffer  : UART_Data_8b (1 .. 1) with Relaxed_Initialization;
    Status  : UART_Status;
+
+   procedure Send_Break is new RP.UART.Send_Break (RP.Timer.Interrupts.Delays);
 
    procedure Send_Hello is
       Hello       : constant String := "Hello Pico !" & ASCII.CR & ASCII.LF;
@@ -32,6 +34,7 @@ procedure Main with SPARK_Mode is
       UART.Transmit (Hello_Bytes, Status);
       if Status /= Ok then
          raise Test_Error with "Send_Hello transmit failed with status " & Status'Image;
+         pragma Annotate (GNATprove, Intentional,"exception might be raised", "Ignoring exception for now");
       end if;
    end Send_Hello;
 
@@ -42,14 +45,18 @@ procedure Main with SPARK_Mode is
          case Status is
             when Err_Error =>
                raise Test_Error with "Echo receive failed with status " & Status'Image;
+               pragma Annotate (GNATprove, Intentional,"exception might be raised", "Ignoring exception for now");
             when Err_Timeout =>
                raise Test_Error with "Unexpected Err_Timeout with timeout disabled!";
+               pragma Annotate (GNATprove, Intentional,"exception might be raised", "Ignoring exception for now");
             when Busy =>
                raise Test_Error with "Unexpected Busy status in UART receive";
+               pragma Annotate (GNATprove, Intentional,"exception might be raised", "Ignoring exception for now");
             when Ok =>
                UART.Transmit (Buffer, Status);
                if Status /= Ok then
                   raise Test_Error with "Echo transmit failed with status " & Status'Image;
+                  pragma Annotate (GNATprove, Intentional,"exception might be raised", "Ignoring exception for now");
                end if;
                Pico.LED.Toggle;
          end case;
@@ -75,6 +82,6 @@ begin
           others    => <>));
 
    Send_Hello;
-   UART.Send_Break (RP.Device.Timer'Access, UART.Frame_Time * 2);
+   Send_Break (UART, RP.Device.Timer, UART.Frame_Time * 2);
    Echo;
 end Main;
