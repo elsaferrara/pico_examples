@@ -21,7 +21,7 @@ procedure Main with SPARK_Mode is
    Buffer  : UART_Data_8b (1 .. 1) with Relaxed_Initialization;
    Status  : UART_Status;
 
-   procedure Send_Break is new RP.UART.Send_Break (RP.Timer.Interrupts.Delays);
+   procedure Send_Break is new RP.UART.Send_Break (RP.Timer.Interrupts.Delay_Microseconds);
 
    procedure Send_Hello is
       Hello       : constant String := "Hello Pico !" & ASCII.CR & ASCII.LF;
@@ -82,6 +82,6 @@ begin
           others    => <>));
 
    Send_Hello;
-   Send_Break (UART, RP.Device.Timer, UART.Frame_Time * 2);
+   Send_Break (UART, UART.Frame_Time * 2);
    Echo;
 end Main;
