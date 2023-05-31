@@ -10,6 +10,11 @@ procedure Main
 with SPARK_Mode => On
 is
 
+         pragma Warnings (Off, """pico.pimoroni.display.cursor_x"" is set by ""Put"" but not used after the call");
+     pragma Warnings (Off, """pico.pimoroni.display.cursor_y"" is set by ""Put"" but not used after the call");
+      pragma Warnings (Off, """pico.pimoroni.display.cursor_x"" is set by ""Draw_Board"" but not used after the call");
+     pragma Warnings (Off, """pico.pimoroni.display.cursor_y"" is set by ""Draw_Board"" but not used after the call");
+
    Zoom : constant := 6;
    --  Number of pixel to represent one block in the game
 
@@ -143,10 +148,10 @@ is
       end Draw_Piece;
    begin
 
-Pico.Pimoroni.Display.Set_Color (White);
-      -- TODO : implémenter le texte
+      Pico.Pimoroni.Display.Set_Color (White);
+
       Set_Text_Cursor (120, 75);
-      Put ("SPARK");
+      Put ("SPARK ");
       Set_Text_Cursor (116, 90);
       Put ("TETRIS");
       Set_Text_Cursor (118, 105);
@@ -240,7 +245,7 @@ Pico.Pimoroni.Display.Set_Color (White);
 begin
 
    --  Setup_Game;
-      RP.Clock.Initialize (Pico.XOSC_Frequency);
+   RP.Clock.Initialize (Pico.XOSC_Frequency);
    RP.Device.Timer.Enable;
    Pico.Pimoroni.Display.Initialize;
    Reset_Game;
@@ -248,6 +253,8 @@ begin
 
    --  Game loop
    loop
+      pragma Loop_Invariant (Piece_Within_Board(Next_Piece));
+      pragma Assert (if State = Piece_Fall then Valid_Configuration);
 
       --  Wait_Next_Frame (B_State);
       --  if (Rnd mod 4) = 0 then
@@ -284,7 +291,9 @@ begin
 
          when New_Piece =>
             --  Add a new piece
+            pragma Assert (Piece_Within_Board(Next_Piece));
             Cur_Piece  := Next_Piece;
+            pragma Assert (Valid_Configuration);
             Random_Piece (Rnd, Next_Piece);
             Cur_State := Piece_Falling;
             Rotation_Count := 0;
@@ -295,13 +304,13 @@ begin
                State := Game_Over;
             else
                State := Piece_Fall;
+            pragma Assert (Valid_Configuration);
             end if;
 
             Draw_Board (True);
 
          when Piece_Fall =>
-
-            if Rotation_Count < 2 then
+           if Rotation_Count < 2 then
                if Just_Pressed (A) then
                   Do_Action (Turn_Counter_Clockwise, Success);
 
